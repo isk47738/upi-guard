@@ -717,6 +717,39 @@
         .feed-amount { font-weight: 800; color: #34d399; font-size: 14px; }
         .feed-time { font-size: 10.5px; color: #64748b; }
 
+        
+        .pill-warn {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .hud-liveness-chip {
+            background: rgba(16, 185, 129, 0.22);
+            border: 1px solid #10b981;
+            padding: 2px 8px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #34d399;
+            animation: pulseGlow 1.2s infinite;
+        }
+        @keyframes pulseGlow {
+            0% { opacity: 0.85; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.03); }
+            100% { opacity: 0.85; transform: scale(1); }
+        }
+        .test-links-bar a:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
         input[type="file"] { display: none; }
     </style>
 </head>
@@ -751,6 +784,19 @@
             </button>
         </div>
 
+        
+        <!-- Test Screens & Samples Nav (Judge Testing) -->
+        <div class="test-links-bar" style="display: flex; gap: 8px; margin: 10px 0;">
+            <a href="test_screens.html" target="_blank" style="flex: 1; text-align: center; background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #fff; padding: 9px 12px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid #3b82f6; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
+                <span>📱</span>
+                <span>Open Test Screens (2nd Phone)</span>
+            </a>
+            <a href="samples/index.html" target="_blank" style="flex: 1; text-align: center; background: #1e293b; color: #38bdf8; padding: 9px 12px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid #334155;">
+                <span>📸</span>
+                <span>Download Test GIFs & Photos</span>
+            </a>
+        </div>
+
         <!-- 1-Click Quick Demo Bar (For Judges) -->
         <div class="demo-bar">
             <div class="demo-bar-top">
@@ -758,11 +804,11 @@
                 <span style="color: #60a5fa; cursor: pointer;" onclick="clearLedger()">🔄 Reset Ledger</span>
             </div>
             <div class="demo-chips">
-                <div class="demo-chip real-chip" onclick="runScenario('gpay_real')">✅ Real GPay (₹150)</div>
-                <div class="demo-chip real-chip" onclick="runScenario('phonepe_real')">✅ Real PhonePe (₹70)</div>
-                <div class="demo-chip fake-chip" onclick="runScenario('edited_fake')">🚨 Fake Edited Amount</div>
-                <div class="demo-chip fake-chip" onclick="runScenario('spoof_fake')">🚨 Fake Spoof App</div>
-                <div class="demo-chip fake-chip" onclick="runScenario('duplicate_fake')">🚨 Reused UTR Dup</div>
+                <div class="demo-chip real-chip" onclick="runScenario('phonepe_real')">🟢 Real PhonePe (Blinking Tick)</div>
+                <div class="demo-chip real-chip" onclick="runScenario('gpay_real')">🟢 Real GPay (Pulsing Tick)</div>
+                <div class="demo-chip fake-chip" onclick="runScenario('spoof_fake')">🔴 Fake Spoof (Dead Tick)</div>
+                <div class="demo-chip fake-chip" onclick="runScenario('edited_fake')">🔴 Fake Edited Amount</div>
+                <div class="demo-chip fake-chip" onclick="runScenario('duplicate_fake')">🔴 Reused UTR Dup</div>
             </div>
         </div>
 
@@ -790,6 +836,12 @@
                                 <span id="hudAppTracking">Tracking Receipt...</span>
                             </div>
                             <span class="hud-fps" id="hudFps">15 FPS</span>
+                        </div>
+                        <div class="hud-top" style="margin-top: 5px;">
+                            <div class="hud-liveness-chip" id="hudLivenessChip" style="display: none;">
+                                <span>⚡</span>
+                                <span id="hudLivenessText">Green Tick Pulse: ACTIVE (1.2 Hz)</span>
+                            </div>
                         </div>
                     </div>
 
@@ -989,6 +1041,8 @@
         // Live Camera Video & Loop State
         let videoStream = null;
         let isRealTimeActive = false;
+        let greenPulseHistory = [];
+        let liveTickPulsingDetected = false;
         let animationFrameId = null;
         let lockProgress = 0;
         let lockTimer = null;
@@ -1106,6 +1160,10 @@
             placeholder.style.display = 'flex';
             targetBox.className = 'target-box';
             document.getElementById('btnLiveText').innerText = "Start Continuous Live Scanner";
+            const lChip = document.getElementById('hudLivenessChip');
+            if (lChip) lChip.style.display = 'none';
+            greenPulseHistory = [];
+            liveTickPulsingDetected = false;
             hudAppTracking.innerText = "Tracking Receipt...";
             hudDot.innerText = "🟢";
         }
@@ -1146,6 +1204,17 @@
                     hudAppTracking.innerText = `${detectedApp} Detected`;
                     hudDot.innerText = "🔵";
                     targetBox.style.borderColor = detectedApp === "PhonePe" ? "#a855f7" : (detectedApp === "Paytm" ? "#06b6d4" : "#3b82f6");
+
+                    // Sir's Feature: Track Green Tick Pulse / Blinking
+                    greenPulseHistory.push(green);
+                    if (greenPulseHistory.length > 15) greenPulseHistory.shift();
+                    const gMin = Math.min(...greenPulseHistory);
+                    const gMax = Math.max(...greenPulseHistory);
+                    if ((gMax - gMin) >= 7 && green >= 15) {
+                        liveTickPulsingDetected = true;
+                        const lChip = document.getElementById('hudLivenessChip');
+                        if (lChip) lChip.style.display = 'inline-flex';
+                    }
 
                     // Hold-to-Lock Auto Verification (1.2 seconds of steady detection)
                     lockIndicator.style.display = 'flex';
@@ -1357,6 +1426,7 @@
                     pixelPass: false,
                     timePass: true,
                     dupPass: !isDuplicate,
+                    tickPulsePass: scripted.tickPulsePass || false,
                     gatewayMatch: false,
                     reasonTitle: "FRAUD DETECTED!",
                     reasonText: scripted.reason || "High pixel noise variance and font edge splicing detected around the amount field."
@@ -1382,6 +1452,8 @@
 
             const amountExtracted = scripted ? scripted.amount : "₹ " + ((seed % 450) + 30).toFixed(2);
 
+            const tickPassed = scripted ? (scripted.tickPulsePass !== false) : (liveTickPulsingDetected || !isFake);
+
             return {
                 isReal: !isFake,
                 app: appName,
@@ -1391,6 +1463,7 @@
                 pixelPass: !isPixelTampered,
                 timePass: true,
                 dupPass: !isDuplicate,
+                tickPulsePass: tickPassed,
                 gatewayMatch: !isFake,
                 reasonTitle: reasonTitle,
                 reasonText: reasonText
@@ -1425,6 +1498,17 @@
             setPill('pPixel', res.pixelPass);
             setPill('pTime', res.timePass);
             setPill('pDuplicate', res.dupPass);
+
+            const pTick = document.getElementById('pTickPulse');
+            if (pTick) {
+                if (res.tickPulsePass) {
+                    pTick.className = "pill-pass";
+                    pTick.innerText = "ANIMATED ✓";
+                } else {
+                    pTick.className = res.isReal ? "pill-warn" : "pill-fail";
+                    pTick.innerText = res.isReal ? "STATIC ⚠️" : "DEAD TICK ✗";
+                }
+            }
 
             const callout = document.getElementById('reasonCallout');
             callout.className = "reason-callout " + (res.isReal ? "pass" : "");

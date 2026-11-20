@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPI Guard - Test Samples & Animated GIFs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #090d16;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            padding: 24px 16px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 { font-size: 24px; color: #38bdf8; margin-bottom: 6px; }
+        p { color: #94a3b8; font-size: 14px; margin-bottom: 24px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .card.real { border-color: rgba(16, 185, 129, 0.4); }
+        .card.fake { border-color: rgba(239, 68, 68, 0.4); }
+        .card-header {
+            padding: 12px 16px;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card.real .card-header { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .card.fake .card-header { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+        .card-img-wrap {
+            height: 380px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .card-img-wrap img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .card-body {
+            padding: 14px 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .card-desc {
+            font-size: 12px;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+        .btn-dl {
+            background: #2563eb;
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 12.5px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-dl:hover { background: #1d4ed8; }
+        .nav-back {
+            display: inline-block;
+            margin-bottom: 16px;
+            color: #38bdf8;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="nav-back">← Back to UPI Guard Scanner</a>
+    <h1>📸 Test Photos & Animated GIFs (Judge Testing)</h1>
+    <p>Use these sample files to test the UPI Guard camera scanner. Notice how the genuine samples have an <strong>animating/pulsing green checkmark</strong>, whereas fake spoof apps have a static dead tick!</p>
+
+    <div class="grid">
+        <!-- 1. Real PhonePe with Animated Pulsing Tick -->
+        <div class="card real">
+            <div class="card-header">
+                <span>🟢 Real PhonePe (Blinking Tick)</span>
+                <span>ANIMATED GIF</span>
+            </div>
+            <div class="card-img-wrap">
+                <img src="real_phonepe_tick_blink.gif" alt="Real PhonePe with Blinking Tick">
+            </div>
+            <div class="card-body">
+                <div class="card-desc">
+                    <strong>Features:</strong> Genuine PhonePe theme, animated pulsing green checkmark with expanding ripple ring, live UTR, matches Soundbox gateway.
+                </div>
+                <a href="real_phonepe_tick_blink.gif" download class="btn-dl">⬇️ Download Animated GIF</a>
+            </div>
+        </div>
+
+        <!-- 2. Real Google Pay with Pulsing Tick -->
+        <div class="card real">
+            <div class="card-header">
+                <span>🟢 Real Google Pay (Pulsing Tick)</span>
+                <span>ANIMATED GIF</span>
+            </div>
+            <div class="card-img-wrap">
+                <img src="real_gpay_tick_blink.gif" alt="Real Google Pay with Pulsing Tick">
+            </div>
+            <div class="card-body">
+                <div class="card-desc">
+                    <strong>Features:</strong> Official Google Pay layout, dynamic animated green tick with pulse wave, genuine UPI ID format.
+                </div>
+                <a href="real_gpay_tick_blink.gif" download class="btn-dl">⬇️ Download Animated GIF</a>
+            </div>
+        </div>
+
+        <!-- 3. Real PhonePe Static PNG -->
+        <div class="card real">
+            <div class="card-header">
+                <span>🟢 Real PhonePe Sample</span>
+                <span>PNG PHOTO</span>
+            </div>
+            <div class="card-img-wrap">
+                <img src="real_phonepe_sample.png" alt="Real PhonePe Sample">
+            </div>
+            <div class="card-body">
+                <div class="card-desc">
+                    <strong>Features:</strong> High-resolution receipt image for static file upload or camera scanning. Passes geometry, brand palette & ELA integrity.
+                </div>
+                <a href="real_phonepe_sample.png" download class="btn-dl">⬇️ Download PNG Photo</a>
+            </div>
+        </div>
+
+        <!-- 4. Real Google Pay Static PNG -->
+        <div class="card real">
+            <div class="card-header">
+                <span>🟢 Real Google Pay Sample</span>
+                <span>PNG PHOTO</span>
+            </div>
+            <div class="card-img-wrap">
+                <img src="real_gpay_sample.png" alt="Real Google Pay Sample">
+            </div>
+            <div class="card-body">
+                <div class="card-desc">
+                    <strong>Features:</strong> High-resolution Google Pay receipt. Authentic font kerning, correct card aspect ratio.
+                </div>
+                <a href="real_gpay_sample.png" download class="btn-dl">⬇️ Download PNG Photo</a>
+            </div>
+        </div>
+
+        <!-- 5. Fake Spoof App -->
+        <div class="card fake">
+            <div class="card-header">
+                <span>🔴 Fake Spoof App (Dead Tick)</span>
+                <span>PNG PHOTO</span>
+            </div>
+            <div class="card-img-wrap">
+                <img src="fake_spoof_sample.png" alt="Fake Spoof App Sample">
+            </div>
+            <div class="card-body">
+                <div class="card-desc">
+                    <strong>Failure Points:</strong> Static dead green tick (no animation/pulse), wrong purple hex shade (#7e22ce), missing NPCI checksum, spoofed layout.
+                </div>
+                <a href="fake_spoof_sample.png" download class="btn-dl" style="background: #dc2626;">⬇️ Download Fake Sample</a>
+            </div>
+        </div>
+
+        <!-- 6. Fake Edited Amount -->
+        <div class="card fake">
+            <div class="card-header">
+                <span>🔴 Edited Amount (Spliced)</span>
+                <span>PNG PHOTO</span>
+            </div>
+            <div class="card-img-wrap">
+                <img src="fake_edited_sample.png" alt="Fake Edited Amount Sample">
+            </div>
+            <div class="card-body">
+                <div class="card-desc">
+                    <strong>Failure Points:</strong> Amount digitally edited to Rs. 2,500.00. High Error Level Analysis (ELA) compression edge noise disparity.
+                </div>
+                <a href="fake_edited_sample.png" download class="btn-dl" style="background: #dc2626;">⬇️ Download Edited Sample</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

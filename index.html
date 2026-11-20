@@ -1724,18 +1724,27 @@
 
         async function startRealtimeCamera() {
             try {
-                const constraints = {
-                    video: {
-                        facingMode: currentFacingMode,
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    },
-                    audio: false
-                };
+                isProcessing = false;
+                lockProgress = 0;
 
-                videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+                let stream = null;
+                // Strategy 1: Ideal facingMode constraint
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: { ideal: currentFacingMode } },
+                        audio: false
+                    });
+                } catch (e1) {
+                    console.warn("Strategy 1 failed, trying fallback to any camera:", e1);
+                    // Strategy 2: Generic fallback for strict mobile drivers
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: false
+                    });
+                }
+
+                videoStream = stream;
                 video.srcObject = videoStream;
-                await video.play();
 
                 placeholder.style.display = 'none';
                 imgPreview.style.display = 'none';
@@ -1743,14 +1752,20 @@
                 video.style.display = 'block';
                 laser.style.display = 'block';
 
+                // Robust non-blocking play
+                video.onloadedmetadata = () => {
+                    video.play().catch(e => console.log("Play onloadedmetadata:", e));
+                };
+                video.play().catch(e => console.log("Play direct:", e));
+
                 document.getElementById('btnLiveText').innerText = "Stop Real-Time Scanner";
                 isRealTimeActive = true;
 
                 requestAnimationFrame(realtimeInspectionLoop);
 
             } catch (err) {
-                console.warn("Camera failed:", err);
-                alert("Camera permission denied. If using Chrome, please allow camera permission or open via HTTPS!");
+                console.warn("Camera failed completely:", err);
+                alert("Camera access failed (" + (err.name || err.message) + "). Please allow camera permissions in your browser or use 'Camera Snap' / 'Upload Photo' below!");
                 stopRealtimeCamera();
             }
         }
@@ -1761,8 +1776,11 @@
                 videoStream = null;
             }
             isRealTimeActive = false;
+            isProcessing = false;
+            lockProgress = 0;
             isTorchOn = false;
-            document.getElementById('btnTorch').classList.remove('active');
+            const torchBtn = document.getElementById('btnTorch');
+            if (torchBtn) torchBtn.classList.remove('active');
             video.style.display = 'none';
             laser.style.display = 'none';
             lockIndicator.style.display = 'none';
@@ -2191,6 +2209,8 @@
             verdictBox.style.display = 'none';
             imgPreview.style.display = 'none';
             placeholder.style.display = 'flex';
+            isProcessing = false;
+            lockProgress = 0;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 

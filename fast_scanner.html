@@ -2596,18 +2596,15 @@
             alert(`Counter QR Bill Amount set to ₹${amt}.00! Students scanning this QR will now pay ₹${amt}.00.`);
         }
 
-        function exportIncidentLog() {
-            const csv = "Timestamp,Type,UTR,Amount,Status
-" +
-                `Today 02:45 AM,PhonePe,432501984211,₹150.00,Verified Real
-` +
-                `Today 02:50 AM,Google Pay,432501984209,₹70.00,Verified Real
-` +
-                `Today 03:01 AM,SpoofApp,FP9988112233,₹500.00,Blocked Fraud
-` +
-                `Today 03:15 AM,EditedPe,T241199321098,₹850.00,Blocked Splicing Fraud
-`;
-            
+                function exportIncidentLog() {
+            const csv = [
+                "Timestamp,Type,UTR,Amount,Status",
+                "Today 02:45 AM,PhonePe,432501984211,Rs. 150.00,Verified Real",
+                "Today 02:50 AM,Google Pay,432501984209,Rs. 70.00,Verified Real",
+                "Today 03:01 AM,SpoofApp,FP9988112233,Rs. 500.00,Blocked Fraud",
+                "Today 03:15 AM,EditedPe,T241199321098,Rs. 850.00,Blocked Splicing Fraud"
+            ].join("\n");
+
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');

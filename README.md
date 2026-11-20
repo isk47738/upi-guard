@@ -4,7 +4,7 @@
 
 ## 🌐 Live App
 **Open on any phone, anywhere:**  
-👉 [https://YOUR_USERNAME.github.io/upi-guard](https://YOUR_USERNAME.github.io/upi-guard)
+👉 [https://isk47738.github.io/upi-guard](https://isk47738.github.io/upi-guard)
 
 > _No installation needed. Works on Android & iOS directly in browser. Install as native app via "Add to Home Screen"._
 
@@ -41,7 +41,7 @@ Campus canteens and small shops get shown **edited "Payment Successful" screensh
 
 ```bash
 # Clone the repo
-git clone https://github.com/YOUR_USERNAME/upi-guard.git
+git clone https://github.com/isk47738/upi-guard.git
 cd upi-guard
 
 # Start server (Python required)

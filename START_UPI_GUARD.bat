@@ -20,7 +20,7 @@ echo   ✅ AAPKA APP LAPTOP PE KHUL GAYA HAI!
 echo.
 echo   📱 PHONE PE CHALANE KE LIYE (Mobile Tethering):
 echo   👉 Phone ke Chrome browser me ye link daalo:
-echo      http://10.28.232.213:8000
+echo      Server window me dikhne wala Phone / Wi-Fi link use karein.
 echo =================================================================
 echo.
 pause

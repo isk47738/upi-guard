@@ -5,11 +5,13 @@ Pure Python Standard Library (Zero External Dependencies)
 """
 import http.server
 import socketserver
+import threading
 import socket
 import sqlite3
 import json
 import os
 import sys
+import re
 from datetime import datetime
 
 PORT = 8000
@@ -57,15 +59,38 @@ class UPIGuardHandler(http.server.SimpleHTTPRequestHandler):
             return
         return super().do_GET()
 
+    def do_HEAD(self):
+        return super().do_HEAD()
+
     def do_POST(self):
         if self.path == '/api/verify_utr':
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            data = json.loads(post_data.decode('utf-8'))
-            utr = data.get('utr', '').strip()
-            amount = data.get('amount', '')
-            app = data.get('app', '')
-            terminal = data.get('terminal', 'Counter_Mobile')
+            try:
+                content_length = int(self.headers.get('Content-Length', '0'))
+                if content_length <= 0 or content_length > 10000:
+                    raise ValueError('Invalid request size')
+                post_data = self.rfile.read(content_length)
+                data = json.loads(post_data.decode('utf-8'))
+            except (ValueError, json.JSONDecodeError, UnicodeDecodeError):
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "INVALID_REQUEST", "valid": False, "message": "Invalid UTR verification request."}).encode('utf-8'))
+                return
+
+            utr = str(data.get('utr', '')).strip().upper()
+            amount = str(data.get('amount', ''))
+            app = str(data.get('app', ''))
+            terminal = str(data.get('terminal', 'Counter_Mobile'))
+            register = bool(data.get('register', False))
+
+            if not utr or len(utr) > 32 or not re.fullmatch(r'(?:\d{12}|T\d{10,25})', utr):
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "INVALID_UTR", "valid": False, "message": "Invalid UTR format."}).encode('utf-8'))
+                return
 
             conn = sqlite3.connect(DB_FILE)
             c = conn.cursor()
@@ -81,7 +106,7 @@ class UPIGuardHandler(http.server.SimpleHTTPRequestHandler):
                     "claimed_at_terminal": row[1],
                     "message": f"ALERT: UTR {utr} was already redeemed at {row[1]} on {row[0]}!"
                 }
-            else:
+            elif register:
                 c.execute('INSERT INTO verified_utrs (utr, amount, app, terminal_id) VALUES (?, ?, ?, ?)',
                           (utr, amount, app, terminal))
                 conn.commit()
@@ -89,6 +114,12 @@ class UPIGuardHandler(http.server.SimpleHTTPRequestHandler):
                     "status": "UNIQUE_RECORDED",
                     "valid": True,
                     "message": f"UTR {utr} registered successfully as genuine transaction."
+                }
+            else:
+                response = {
+                    "status": "UNIQUE_AVAILABLE",
+                    "valid": True,
+                    "message": f"UTR {utr} is not present in the shared ledger."
                 }
             conn.close()
 
@@ -104,6 +135,8 @@ class UPIGuardHandler(http.server.SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     init_db()
     local_ip = get_local_ip()
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
     print("=" * 65)
     print("🛡️   UPI Guard - Fake UPI Screenshot Detector Server")
     print("=" * 65)
@@ -117,7 +150,11 @@ if __name__ == "__main__":
     print("=" * 65)
 
     socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", PORT), UPIGuardHandler) as httpd:
+    class UPIGuardServer(socketserver.ThreadingTCPServer):
+        allow_reuse_address = True
+        daemon_threads = True
+
+    with UPIGuardServer(("", PORT), UPIGuardHandler) as httpd:
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:

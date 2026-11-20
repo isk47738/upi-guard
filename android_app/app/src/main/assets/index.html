@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>UPI Guard - Fake UPI Payment Screenshot Detector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --surface: #131b2e;
+            --surface-card: #1c2640;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.25);
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.25);
+            --warning: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #2d3748;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 14px 40px 14px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* Top Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .brand-text h1 {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-text span {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: block;
+        }
+
+        .badge-timer {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .badge-timer::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+        }
+
+        /* Capture Section */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn-action {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: var(--surface-card);
+            border: 1.5px dashed #4b5563;
+            border-radius: 12px;
+            padding: 14px 10px;
+            color: var(--text-main);
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .btn-action:hover, .btn-action:active {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-action span.icon {
+            font-size: 22px;
+        }
+
+        .btn-live-cam {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-live-cam:hover {
+            background: #1e40af;
+        }
+
+        /* Demo Selector for Hackathon Judges */
+        .demo-bar {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .demo-bar-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .demo-chips {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+        }
+
+        .demo-chip {
+            background: #1e293b;
+            border: 1px solid #3b82f6;
+            color: #e2e8f0;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .demo-chip:hover, .demo-chip.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .demo-chip.fraud {
+            border-color: #ef4444;
+        }
+
+        .demo-chip.fraud:hover, .demo-chip.fraud.active {
+            background: #ef4444;
+            color: white;
+        }
+
+        /* Viewfinder Box */
+        .preview-box {
+            position: relative;
+            width: 100%;
+            height: 260px;
+            background: #070a12;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1.5px solid var(--border);
+        }
+
+        #imagePreview {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        #cameraVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        #canvasProcessed, #canvasELA {
+            display: none;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* Scanning Laser Animation */
+        .laser-beam {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #3b82f6, #60a5fa, transparent);
+            box-shadow: 0 0 14px #3b82f6, 0 0 8px #60a5fa;
+            display: none;
+            animation: scanLaser 2s infinite ease-in-out alternate;
+            z-index: 10;
+        }
+
+        @keyframes scanLaser {
+            0% { top: 5%; }
+            100% { top: 92%; }
+        }
+
+        .preview-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 6px;
+            color: #64748b;
+            font-size: 13px;
+            padding: 20px;
+        }
+
+        .btn-capture-frame {
+            position: absolute;
+            bottom: 12px;
+            background: #ef4444;
+            color: white;
+            border: 3px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+            z-index: 20;
+        }
+
+        .ela-toggle-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fbbf24;
+            border: 1px solid #d97706;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            display: none;
+            backdrop-filter: blur(4px);
+            z-index: 20;
+        }
+
+        /* Verdict Card */
+        .verdict-card {
+            border-radius: 16px;
+            padding: 18px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .verdict-card.real {
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.85), rgba(16, 185, 129, 0.25));
+            border: 2px solid var(--success);
+            box-shadow: 0 10px 25px var(--success-glow);
+        }
+
+        .verdict-card.suspicious {
+            background: linear-gradient(135deg, rgba(127, 29, 29, 0.9), rgba(239, 68, 68, 0.3));
+            border: 2px solid var(--danger);
+            box-shadow: 0 10px 25px var(--danger-glow);
+        }
+
+        .verdict-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .verdict-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .verdict-card.real .verdict-title { color: #34d399; }
+        .verdict-card.suspicious .verdict-title { color: #f87171; }
+
+        .scan-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: #e2e8f0;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        /* Extracted Details Pill Grid */
+        .extracted-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+
+        .extracted-grid div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .extracted-grid span.label {
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .extracted-grid span.val {
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Checks Checklist */
+        .checks-box {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .check-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .check-tag {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 4px;
+        }
+
+        .check-tag.pass {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+
+        .check-tag.fail {
+            background: rgba(239, 68, 68, 0.25);
+            color: #fca5a5;
+        }
+
+        /* Reason Box */
+        .reasons-box {
+            background: rgba(0, 0, 0, 0.5);
+            border-left: 4px solid var(--danger);
+            padding: 10px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .reasons-box.pass {
+            border-left-color: var(--success);
+        }
+
+        .reasons-box strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12.5px;
+        }
+
+        .reasons-box ul {
+            margin-left: 16px;
+        }
+
+        .reasons-box li {
+            margin-bottom: 2px;
+        }
+
+        /* Reset Button */
+        .btn-reset {
+            background: var(--surface-card);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .btn-reset:hover {
+            color: white;
+            border-color: #64748b;
+        }
+
+        /* Help Info Card */
+        .info-card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #94a3b8;
+        }
+
+        .info-card h3 {
+            color: #f3f4f6;
+            font-size: 13px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-card ul {
+            margin-left: 18px;
+            margin-top: 4px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Header -->
+        <header>
+            <div class="brand">
+                <div class="logo-icon">🛡️</div>
+                <div class="brand-text">
+                    <h1>UPI Guard</h1>
+                    <span>Fake Screenshot Forensic Detector</span>
+                </div>
+            </div>
+            <div class="badge-timer">
+                &lt; 3.0s Engine
+            </div>
+        </header>
+
+        <!-- Main Card -->
+        <div class="card">
+            
+            <!-- Live Camera Button -->
+            <button class="btn-live-cam" id="btnLiveCam" onclick="toggleLiveCamera()">
+                📷 Open Live Camera Scanner
+            </button>
+
+            <!-- Quick Actions -->
+            <div class="action-row">
+                <label for="cameraInput" class="btn-action">
+                    <span class="icon">📸</span>
+                    <span>Camera Snap</span>
+                </label>
+                <input type="file" id="cameraInput" accept="image/*" capture="environment">
+
+                <label for="fileInput" class="btn-action">
+                    <span class="icon">📁</span>
+                    <span>Upload Screenshot</span>
+                </label>
+                <input type="file" id="fileInput" accept="image/*">
+            </div>
+
+            <!-- Pre-loaded Scenarios for Instant Hackathon Testing -->
+            <div class="demo-bar">
+                <div class="demo-bar-title">
+                    <span>⚡ 1-Click Test Scenarios:</span>
+                    <span style="color: #60a5fa; cursor: pointer;" onclick="downloadSampleImage()">💾 Save Demo Img</span>
+                </div>
+                <div class="demo-chips">
+                    <div class="demo-chip" onclick="loadDemoScenario('gpay_real', this)">✅ GPay Genuine</div>
+                    <div class="demo-chip" onclick="loadDemoScenario('phonepe_real', this)">✅ PhonePe Genuine</div>
+                    <div class="demo-chip fraud" onclick="loadDemoScenario('edited_amount', this)">⚠️ Edited Amount (ELA)</div>
+                    <div class="demo-chip fraud" onclick="loadDemoScenario('reused_utr', this)">⚠️ Reused UTR Dup</div>
+                    <div class="demo-chip fraud" onclick="loadDemoScenario('future_time', this)">⚠️ Fake Stale Time</div>
+                </div>
+            </div>
+
+            <!-- Viewfinder / Scanner Area -->
+            <div class="preview-box">
+                <div class="laser-beam" id="laserBeam"></div>
+                <video id="cameraVideo" autoplay playsinline></video>
+                <img id="imagePreview" alt="Screenshot Preview">
+                <canvas id="canvasProcessed"></canvas>
+                <canvas id="canvasELA"></canvas>
+
+                <button class="btn-capture-frame" id="btnCapture" onclick="captureLiveFrame()" title="Snap Frame"></button>
+                
+                <button class="ela-toggle-btn" id="elaToggleBtn" onclick="toggleELAMode()">
+                    🔬 Toggle ELA Forensic Heatmap
+                </button>
+
+                <div class="preview-placeholder" id="placeholder">
+                    <span style="font-size: 26px;">📱</span>
+                    <strong>Scanner Ready</strong>
+                    <span>Live Camera chalu karein ya UPI screenshot upload karein</span>
+                    <small style="color: #475569;">Supports Google Pay, PhonePe & Paytm</small>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Verdict Result Card -->
+        <div class="verdict-card" id="verdictCard">
+            
+            <div class="verdict-header">
+                <div class="verdict-title" id="verdictTitle">
+                    <span id="verdictIcon">✅</span>
+                    <span id="verdictText">REAL PAYMENT</span>
+                </div>
+                <div class="scan-time" id="scanTimeBadge">0.24s</div>
+            </div>
+
+            <!-- Extracted Fields -->
+            <div class="extracted-grid">
+                <div>
+                    <span class="label">Detected UPI App</span>
+                    <span class="val" id="detApp">Google Pay</span>
+                </div>
+                <div>
+                    <span class="label">Amount Paid</span>
+                    <span class="val" id="detAmount">₹ 180.00</span>
+                </div>
+                <div>
+                    <span class="label">UTR / Ref No.</span>
+                    <span class="val" id="detUTR">432501984211</span>
+                </div>
+                <div>
+                    <span class="label">Timestamp</span>
+                    <span class="val" id="detTime">Just now</span>
+                </div>
+            </div>
+
+            <!-- Forensic Checks Breakdown -->
+            <div class="checks-box">
+                <div class="check-item">
+                    <div class="check-name"><span>📐</span> App Layout & Coordinates</div>
+                    <div class="check-tag pass" id="chkLayout">PASS</div>
+                </div>
+                <div class="check-item">
+                    <div class="check-name"><span>🔬</span> Font & ELA Pixel Inconsistency</div>
+                    <div class="check-tag pass" id="chkPixel">PASS</div>
+                </div>
+                <div class="check-item">
+                    <div class="check-name"><span>⏰</span> Timestamp Freshness (&lt; 10 min)</div>
+                    <div class="check-tag pass" id="chkTime">PASS</div>
+                </div>
+                <div class="check-item">
+                    <div class="check-name"><span>🔁</span> Duplicate UTR / Reused ID Check</div>
+                    <div class="check-tag pass" id="chkDuplicate">PASS (Unique)</div>
+                </div>
+            </div>
+
+            <!-- Explanation & Reasons Box -->
+            <div class="reasons-box pass" id="reasonsBox">
+                <strong id="reasonHeader">Forensic Evidence Summary:</strong>
+                <ul id="reasonsList">
+                    <li>Layout elements match standard Google Pay transaction receipt.</li>
+                    <li>No pixel variance or compression anomalies detected around amount text.</li>
+                    <li>Timestamp verified within valid recent transaction window.</li>
+                </ul>
+            </div>
+
+            <button class="btn-reset" onclick="resetScanner()">Scan Next Customer</button>
+        </div>
+
+        <!-- Help Guide Card -->
+        <div class="info-card">
+            <h3>💡 Photo me kya dena hai? (Guidelines)</h3>
+            <ul>
+                <li><strong>Google Pay:</strong> Payment Successful hone ke baad jo "Paid to..." aur green checkmark aata hai.</li>
+                <li><strong>PhonePe:</strong> Purple header wala "Transaction Successful" screen.</li>
+                <li><strong>Paytm:</strong> Blue header wala "Payment Successful - UPI Ref No." screen.</li>
+                <li><strong>Test karne ke liye:</strong> Kisi bhi UPI screenshot ko phone me edit karke amount badal dein, ya uper bane <strong>"⚡ 1-Click Test Scenarios"</strong> button dabayein!</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        // Client-side persistent ledger in localStorage (No Python server required!)
+        function getLedger() {
+            try {
+                const stored = localStorage.getItem('UPI_GUARD_UTR_LEDGER');
+                return stored ? new Set(JSON.parse(stored)) : new Set(["432501984211", "T24112018305"]);
+            } catch(e) {
+                return new Set(["432501984211"]);
+            }
+        }
+
+        function saveLedger(ledger) {
+            try {
+                localStorage.setItem('UPI_GUARD_UTR_LEDGER', JSON.stringify(Array.from(ledger)));
+            } catch(e) {}
+        }
+
+        const UTR_LEDGER = getLedger();
+
+        let showingELA = false;
+        let currentAnalysisResult = null;
+        let videoStream = null;
+        let liveScanTimer = null;
+        let liveScanInProgress = false;
+        let liveLockedUtr = null;
+        let liveLastUtr = null;
+        let liveStableCount = 0;
+
+        // Sound Synthesis
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = AudioContextClass ? new AudioContextClass() : null;
+
+        function playSound(isReal) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (isReal) {
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+            } else {
+                osc.type = "sawtooth";
+                osc.frequency.setValueAtTime(160, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(120, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
+            }
+        }
+
+        // Live Camera Viewfinder Toggle
+        async function toggleLiveCamera() {
+            const video = document.getElementById('cameraVideo');
+            const placeholder = document.getElementById('placeholder');
+            const laser = document.getElementById('laserBeam');
+            const btnLive = document.getElementById('btnLiveCam');
+            const btnCap = document.getElementById('btnCapture');
+            const imgPreview = document.getElementById('imagePreview');
+
+            if (videoStream) {
+                // Stop camera
+                stopLiveScanning();
+                videoStream.getTracks().forEach(t => t.stop());
+                videoStream = null;
+                video.style.display = 'none';
+                laser.style.display = 'none';
+                btnCap.style.display = 'none';
+                placeholder.style.display = 'flex';
+                btnLive.innerText = "📷 Open Live Camera Scanner";
+            } else {
+                try {
+                    imgPreview.style.display = 'none';
+                    document.getElementById('canvasELA').style.display = 'none';
+                    placeholder.style.display = 'none';
+                    
+                    videoStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: "environment" },
+                        audio: false
+                    });
+                    video.srcObject = videoStream;
+                    video.style.display = 'block';
+                    laser.style.display = 'block';
+                    btnCap.style.display = 'block';
+                    btnLive.innerText = "❌ Close Camera";
+                    video.onloadeddata = startLiveScanning;
+                } catch(err) {
+                    alert("Camera access denied or not available. You can use 'Camera Snap' or 'Upload Screenshot' buttons!");
+                }
+            }
+        }
+
+        function stopLiveScanning() {
+            if (liveScanTimer) clearInterval(liveScanTimer);
+            liveScanTimer = null;
+            liveScanInProgress = false;
+            liveLockedUtr = null;
+            liveLastUtr = null;
+            liveStableCount = 0;
+        }
+
+        function startLiveScanning() {
+            if (liveScanTimer) clearInterval(liveScanTimer);
+            liveLockedUtr = null;
+            liveLastUtr = null;
+            liveStableCount = 0;
+            setStatus("Auto live scan started...");
+            liveScanTimer = setInterval(scanLiveFrame, 1200);
+        }
+
+        async function scanLiveFrame() {
+            if (!videoStream || liveScanInProgress || liveLockedUtr) return;
+            const video = document.getElementById('cameraVideo');
+            if (!video.videoWidth || video.readyState < 2) return;
+
+            liveScanInProgress = true;
+            const maxWidth = 720;
+            const scale = Math.min(1, maxWidth / video.videoWidth);
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(video.videoWidth * scale);
+            canvas.height = Math.round(video.videoHeight * scale);
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            try {
+                await processUploadedImage(canvas.toDataURL('image/jpeg', 0.82), null, true);
+                if (currentAnalysisResult && currentAnalysisResult.utr &&
+                    currentAnalysisResult.utr !== "Not read") {
+                    if (liveLastUtr === currentAnalysisResult.utr) {
+                        liveStableCount++;
+                    } else {
+                        liveLastUtr = currentAnalysisResult.utr;
+                        liveStableCount = 1;
+                    }
+                    if (liveStableCount >= 2) {
+                        liveLockedUtr = currentAnalysisResult.utr;
+                        if (liveScanTimer) clearInterval(liveScanTimer);
+                        liveScanTimer = null;
+                        setStatus("Live result confirmed \u2713", true);
+                    }
+                }
+            } finally {
+                liveScanInProgress = false;
+            }
+        }
+
+        function captureLiveFrame() {
+            const video = document.getElementById('cameraVideo');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 480;
+            canvas.height = video.videoHeight || 640;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Turn off camera
+            toggleLiveCamera();
+
+            // Process captured frame
+            window.lastLoadedScenario = null;
+            processUploadedImage(canvas.toDataURL('image/png'), null);
+        }
+
+        // File Inputs
+        document.getElementById('cameraInput').addEventListener('change', handleFileSelect);
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            window.lastLoadedScenario = null;
+            document.querySelectorAll('.demo-chip').forEach(el => el.classList.remove('active'));
+
+            if (videoStream) toggleLiveCamera(); // stop live camera if active
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                processUploadedImage(evt.target.result, null);
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        }
+
+        // Demo Scenarios
+        function loadDemoScenario(type, sourceElement) {
+            if (videoStream) toggleLiveCamera();
+
+            document.querySelectorAll('.demo-chip').forEach(el => el.classList.remove('active'));
+            if (sourceElement) sourceElement.classList.add('active');
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 400;
+            canvas.height = 700;
+            const ctx = canvas.getContext('2d');
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const dateStr = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+            if (type === 'gpay_real') {
+                drawGooglePayTemplate(ctx, 400, 700, "150.00", "LPU Campus Canteen", "43250" + Math.floor(1000000 + Math.random()*9000000), `${dateStr}, ${timeStr}`, false);
+            } else if (type === 'phonepe_real') {
+                drawPhonePeTemplate(ctx, 400, 700, "70.00", "Chai & Snacks Point", "T" + Math.floor(10000000000 + Math.random()*90000000000), `${dateStr}, ${timeStr}`, false);
+            } else if (type === 'edited_amount') {
+                drawPhonePeTemplate(ctx, 400, 700, "850.00", "LPU Campus Canteen", "T241199321098", `${dateStr}, ${timeStr}`, true);
+            } else if (type === 'reused_utr') {
+                drawPaytmTemplate(ctx, 400, 700, "320.00", "Stationery & Prints", "432501984211", `${dateStr}, ${timeStr}`, false);
+            } else if (type === 'future_time') {
+                drawGooglePayTemplate(ctx, 400, 700, "200.00", "LPU Campus Canteen", "432508765432", "28 Dec 2026, 11:45 PM", false);
+            }
+
+            const appName = {gpay_real:'Google Pay', phonepe_real:'PhonePe', edited_amount:'PhonePe', reused_utr:'Paytm', future_time:'Google Pay'}[type];
+            const sc = window.lastLoadedScenario;
+            processUploadedImage(canvas.toDataURL(), { app: appName, amount: sc.amount, utr: sc.utr, time: sc.time, fake: type === 'edited_amount' });
+        }
+
+        // Download sample image directly to phone gallery
+        function downloadSampleImage() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 400;
+            canvas.height = 700;
+            const ctx = canvas.getContext('2d');
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const dateStr = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+            drawGooglePayTemplate(ctx, 400, 700, "180.00", "Campus Food Court", "432509182736", `${dateStr}, ${timeStr}`, false);
+
+            const a = document.createElement('a');
+            a.download = "Genuine_GPay_Screenshot.png";
+            a.href = canvas.toDataURL();
+            a.click();
+            alert("Genuine Sample Screenshot Downloaded! You can upload it to test!");
+        }
+
+        // ==========================================
+        // FORENSIC DETECTION PIPELINE (< 3.0s Engine)
+        // ==========================================
+        // ==========================================
+        // REAL FORENSIC PIPELINE (OCR + rules + ELA + shared ledger)
+        // ==========================================
+
+        // ---- Tunable settings (calibrate these on your real/fake dataset) ----
+        const MAX_AGE_MIN = 10;        // screenshot older than this = stale
+        const FUTURE_TOL_MIN = 2;      // allow tiny clock drift between phones
+        const ELA_RATIO_LIMIT = 3.0;   // critical-field ELA must be > N x the rest of the screen
+        const ELA_ABS_FLOOR = 4.0;     // ...and above this absolute level
+        const TERMINAL_ID = "Counter_Mobile";
+        const MONTHS = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
+
+        function loadImg(src) {
+            return new Promise((res, rej) => {
+                const i = new Image();
+                i.onload = () => res(i);
+                i.onerror = () => rej(new Error("Image could not be loaded"));
+                i.src = src;
+            });
+        }
+
+        // ---- OCR engine (Tesseract.js, pre-warmed on page load) ----
+        let ocrWorker = null, ocrReady = null;
+        function setStatus(msg, ok) {
+            let el = document.getElementById('ocrStatus');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'ocrStatus';
+                el.style.cssText = "position:fixed;bottom:10px;left:10px;z-index:9999;padding:6px 12px;border-radius:20px;font:600 12px sans-serif;color:#fff;background:#334155;opacity:.92;max-width:80vw";
+                document.body.appendChild(el);
+            }
+            el.style.background = ok === true ? "#15803d" : ok === false ? "#b91c1c" : "#334155";
+            el.innerText = msg;
+        }
+        function initOCR() {
+            if (ocrReady) return ocrReady;
+            ocrReady = (async () => {
+                if (!window.Tesseract) throw new Error("OCR library not loaded (phone/laptop needs internet once)");
+                setStatus("Loading OCR engine...");
+                ocrWorker = await Tesseract.createWorker('eng');
+                await ocrWorker.setParameters({ tessedit_pageseg_mode: '11' });
+                setStatus("OCR ready \u2713", true);
+            })();
+            ocrReady.catch(e => { setStatus("OCR failed: " + e.message, false); ocrReady = null; });
+            return ocrReady;
+        }
+        window.addEventListener('load', () => { initOCR().catch(() => {}); });
+
+        // ---- Pure parsing helpers (no DOM, easy to test) ----
+        function to24(h, ap) {
+            h = +h;
+            if (ap) {
+                ap = ap.toLowerCase();
+                if (ap === 'pm' && h < 12) h += 12;
+                if (ap === 'am' && h === 12) h = 0;
+            }
+            return h;
+        }
+
+        function parseDateTime(text) {
+            const t = text.replace(/[|,]/g, ' ').replace(/\s+/g, ' ');
+            const time = '(\\d{1,2}):(\\d{2})(?::\\d{2})?\\s*([AaPp][Mm])?';
+            let m, mo;
+            m = t.match(new RegExp('(\\d{1,2})\\s+([A-Za-z]{3,9})\\.?\\s+(\\d{4})\\s+(?:at\\s+)?' + time));
+            if (m && (mo = MONTHS[m[2].slice(0, 3).toLowerCase()]) !== undefined)
+                return { date: new Date(+m[3], mo, +m[1], to24(m[4], m[6]), +m[5]), raw: m[0] };
+            m = t.match(new RegExp('([A-Za-z]{3,9})\\.?\\s+(\\d{1,2})\\s+(\\d{4})\\s+(?:at\\s+)?' + time));
+            if (m && (mo = MONTHS[m[1].slice(0, 3).toLowerCase()]) !== undefined)
+                return { date: new Date(+m[3], mo, +m[2], to24(m[4], m[6]), +m[5]), raw: m[0] };
+            m = t.match(new RegExp('(\\d{1,2})[/\\-](\\d{1,2})[/\\-](\\d{4})\\s+(?:at\\s+)?' + time));
+            if (m) return { date: new Date(+m[3], +m[2] - 1, +m[1], to24(m[4], m[6]), +m[5]), raw: m[0] };
+            return null;
+        }
+
+        function validateTimestamp(dt, now) {
+            now = now || new Date();
+            if (!dt) return { valid: false, reason: "Could not read the date/time from the screenshot. Ask for a clear full-screen screenshot." };
+            const diff = (now - dt) / 60000;
+            const shown = dt.toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            if (diff < -FUTURE_TOL_MIN)
+                return { valid: false, reason: `IMPOSSIBLE TIMESTAMP: screenshot says "${shown}", which is in the future.` };
+            if (diff > MAX_AGE_MIN) {
+                const age = diff > 1440 ? Math.round(diff / 1440) + " day(s)" : Math.round(diff) + " min";
+                return { valid: false, reason: `STALE TIMESTAMP: payment shown is ${age} old (limit ${MAX_AGE_MIN} min). Likely a reused screenshot.` };
+            }
+            return { valid: true, ageMin: Math.max(0, diff) };
+        }
+
+        function parseUTR(text) {
+            let m = text.match(/(?:transaction\s*id|utr|ref(?:erence)?\.?\s*(?:no\.?|number)?)\s*[:\-]?\s*([A-Za-z]?\d[\d ]{9,28}\d)/i);
+            if (m) return m[1].replace(/\s/g, '').toUpperCase();
+            m = text.match(/\bT\d{10,25}\b/);
+            if (m) return m[0];
+            m = text.match(/\b\d{12}\b/);
+            return m ? m[0] : null;
+        }
+
+        function utrFormatOk(utr, appName) {
+            if (!utr) return false;
+            if (appName === "PhonePe") return /^T\d{10,25}$/.test(utr) || /^\d{12}$/.test(utr);
+            return /^\d{12}$/.test(utr); // Google Pay & Paytm: 12-digit UPI reference
+        }
+
+        function parseAmount(words) {
+            let best = null;
+            for (const w of words) {
+                const tx = w.text.replace(/[,\s]/g, '');
+                const m = tx.match(/^[^\d]{0,2}(\d{1,7}(?:\.\d{1,2})?)$/);
+                if (!m || tx.replace(/\D/g, '').length >= 10) continue;
+                const h = w.bbox.y1 - w.bbox.y0;
+                if (!best || h > best.h) best = { w, h, value: m[1] };
+            }
+            return best;
+        }
+
+        function detectApp(text, colorGuess) {
+            const noUpiTxn = text.replace(/upi\s*transaction\s*id/gi, '');
+            const scores = {
+                "Google Pay": [/google\s*pay|gpay/i.test(text), /upi\s*transaction\s*id/i.test(text), /paid to/i.test(text), /from\s*:?\s*[\w ]*bank/i.test(text)],
+                "PhonePe":    [/phonepe|phone\s*pe/i.test(text), /transaction successful/i.test(text), /transaction\s*id/i.test(noUpiTxn), /\butr\b|debited from/i.test(text)],
+                "Paytm":      [/paytm/i.test(text), /payment successful/i.test(text), /upi\s*ref/i.test(text), /order\s*id/i.test(text)]
+            };
+            const total = {};
+            for (const k in scores) total[k] = scores[k].filter(Boolean).length + (k === colorGuess ? 1 : 0);
+            const ranked = Object.entries(total).sort((a, b) => b[1] - a[1]);
+            if (ranked[0][1] >= 2 && ranked[0][1] > ranked[1][1]) return ranked[0][0];
+            return null; // unknown layout
+        }
+
+        function colorGuessApp(pixels) {
+            let purple = 0, blue = 0, cyan = 0;
+            for (let i = 0; i < pixels.length; i += 16) {
+                const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2];
+                if (r > 70 && r < 120 && g < 50 && b > 130) purple++;
+                if (r < 50 && g > 100 && b > 200) blue++;
+                if (r < 30 && g > 150 && b > 220) cyan++;
+            }
+            if (purple > blue && purple > cyan) return "PhonePe";
+            if (cyan > blue && cyan > purple) return "Paytm";
+            if (blue > 0) return "Google Pay";
+            return null;
+        }
+
+        // ---- Real ELA: re-save as JPEG @90% and measure what changed, per field ----
+        async function computeRealELA(fullCanvas, critBoxes, refBoxes) {
+            const w = fullCanvas.width, h = fullCanvas.height;
+            const origData = fullCanvas.getContext('2d').getImageData(0, 0, w, h).data;
+            const re = await loadImg(fullCanvas.toDataURL('image/jpeg', 0.90));
+            const tmp = document.createElement('canvas');
+            tmp.width = w; tmp.height = h;
+            const tctx = tmp.getContext('2d');
+            tctx.drawImage(re, 0, 0);
+            const reData = tctx.getImageData(0, 0, w, h).data;
+
+            const diff = new Float32Array(w * h);
+            const heat = document.getElementById('canvasELA');
+            heat.width = w; heat.height = h;
+            const hctx = heat.getContext('2d');
+            const hImg = hctx.createImageData(w, h);
+            for (let i = 0, p = 0; i < diff.length; i++, p += 4) {
+                const d = Math.max(Math.abs(origData[p] - reData[p]), Math.abs(origData[p + 1] - reData[p + 1]), Math.abs(origData[p + 2] - reData[p + 2]));
+                diff[i] = d;
+                const v = Math.min(255, d * 14);
+                hImg.data[p] = v; hImg.data[p + 1] = v * 0.45; hImg.data[p + 2] = 0; hImg.data[p + 3] = 255;
+            }
+            hctx.putImageData(hImg, 0, 0);
+
+            const meanIn = (b) => {
+                const x0 = Math.max(0, Math.floor(b.x0)), x1 = Math.min(w, Math.ceil(b.x1));
+                const y0 = Math.max(0, Math.floor(b.y0)), y1 = Math.min(h, Math.ceil(b.y1));
+                let s = 0, n = 0;
+                for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) { s += diff[y * w + x]; n++; }
+                return n ? s / n : 0;
+            };
+            const critMeans = critBoxes.map(meanIn);
+            const refMeans = refBoxes.map(meanIn).sort((a, b) => a - b);
+            const refMedian = refMeans.length ? refMeans[Math.floor(refMeans.length / 2)] : 0;
+            const critMax = critMeans.length ? Math.max(...critMeans) : 0;
+            const ratio = critMax / Math.max(refMedian, 0.5);
+
+            hctx.lineWidth = Math.max(2, w / 300);
+            hctx.strokeStyle = "#22d3ee";
+            critBoxes.forEach(b => hctx.strokeRect(b.x0 - 3, b.y0 - 3, b.x1 - b.x0 + 6, b.y1 - b.y0 + 6));
+
+            return { ratio, critMax, refMedian, canvas: heat, measured: critBoxes.length > 0 && refBoxes.length >= 3 };
+        }
+
+        // ---- Shared ledger (server) with offline fallback ----
+        async function checkUTR(utr, amount, app, register) {
+            try {
+                const r = await fetch('/api/verify_utr', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ utr, amount, app, terminal: TERMINAL_ID, register })
+                });
+                if (!r.ok) throw new Error("server " + r.status);
+                const d = await r.json();
+                return { dup: d.status === 'DUPLICATE_REUSED', msg: d.message, source: 'server' };
+            } catch (e) {
+                const dup = UTR_LEDGER.has(utr);
+                if (register && !dup) { UTR_LEDGER.add(utr); saveLedger(UTR_LEDGER); }
+                return { dup, msg: dup ? `UTR ${utr} already seen on this device.` : "", source: 'local' };
+            }
+        }
+
+        function buildResult(o) {
+            // o: app, amount, utr, rawTime, layoutOk, layoutWhy, pixelOk, pixelWhy, time, utrFmtOk, dup, dupMsg, notes, ela
+            const reasons = [];
+            if (!o.layoutOk) reasons.push(o.layoutWhy);
+            if (!o.pixelOk) reasons.push(o.pixelWhy);
+            if (!o.time.valid) reasons.push(o.time.reason);
+            if (!o.utrFmtOk) reasons.push(o.utr ? `Transaction ID "${o.utr}" does not match the ${o.app || "UPI"} format.` : "Could not read a transaction ID. Ask for a clear full-screen screenshot.");
+            if (o.dup) reasons.push(`REUSED TRANSACTION ID: ${o.dupMsg || o.utr + " was already used."}`);
+            const bad = reasons.length > 0;
+            if (!bad) {
+                reasons.push(`Recognised as a ${o.app} receipt (layout anchors found).`);
+                reasons.push(o.pixelWhy);
+                reasons.push(`Payment time is ${Math.round(o.time.ageMin)} min old (limit ${MAX_AGE_MIN} min).`);
+                reasons.push(`Transaction ID ${o.utr} has a valid format and has not been used before.`);
+                reasons.push("Reminder: for large amounts, also confirm the credit in your own UPI app or SMS.");
+            }
+            return {
+                app: o.app || "Unknown", amount: o.amount || "Not read", utr: o.utr || "Not read",
+                timestamp: o.rawTime || "Not read", isSuspicious: bad,
+                layoutPass: o.layoutOk, pixelPass: o.pixelOk, timePass: o.time.valid && !!o.rawTime,
+                dupPass: o.utrFmtOk && !o.dup, reasons, elaCanvas: o.ela || null
+            };
+        }
+
+        // ---- Main pipeline for real uploads / camera ----
+        async function runForensicPipeline(img, options = {}) {
+            const registerInLedger = options.registerInLedger !== false;
+            const MAXW = 1600;
+            const k = Math.min(1, MAXW / img.width);
+            const full = document.getElementById('canvasProcessed');
+            full.width = Math.round(img.width * k);
+            full.height = Math.round(img.height * k);
+            const fctx = full.getContext('2d');
+            fctx.drawImage(img, 0, 0, full.width, full.height);
+
+            // OCR copy at ~1000px wide (upscale tiny images, shrink huge ones)
+            const ocrC = document.createElement('canvas');
+            const os = 1000 / full.width;
+            ocrC.width = 1000; ocrC.height = Math.round(full.height * os);
+            const octx = ocrC.getContext('2d');
+            octx.imageSmoothingQuality = 'high';
+            octx.drawImage(full, 0, 0, ocrC.width, ocrC.height);
+
+            await initOCR();
+            setStatus("Reading screenshot...");
+            const { data } = await ocrWorker.recognize(ocrC);
+            setStatus("OCR ready \u2713", true);
+
+            const inv = 1 / os;
+            const words = (data.words || []).filter(w => w.text && w.text.trim()).map(w => ({
+                text: w.text.trim(), conf: w.confidence,
+                bbox: { x0: w.bbox.x0 * inv, y0: w.bbox.y0 * inv, x1: w.bbox.x1 * inv, y1: w.bbox.y1 * inv }
+            }));
+            const text = data.text || "";
+
+            const colorGuess = colorGuessApp(fctx.getImageData(0, 0, full.width, full.height).data);
+            const app = detectApp(text, colorGuess);
+            const aspect = full.height / full.width;
+            const aspectOk = aspect >= 1.4 && aspect <= 2.6;
+            let layoutOk = !!app && aspectOk, layoutWhy = "";
+            if (!app) layoutWhy = "Layout not recognised as Google Pay, PhonePe or Paytm (missing expected labels).";
+            else if (!aspectOk) layoutWhy = "Abnormal aspect ratio: cropped or non-mobile payment layout.";
+
+            const amt = parseAmount(words);
+            const utr = parseUTR(text);
+            const dtp = parseDateTime(text);
+            const time = validateTimestamp(dtp ? dtp.date : null);
+            const utrFmtOk = utrFormatOk(utr, app);
+
+            // critical boxes = amount, UTR digits, date/time tokens; reference = every other word
+            const crit = [];
+            const isCrit = new Set();
+            if (amt) { crit.push(amt.w.bbox); isCrit.add(amt.w); }
+            const utrDigits = utr ? utr.replace(/\D/g, '') : "";
+            words.forEach(w => {
+                const d = w.text.replace(/\D/g, '');
+                const isUtrPart = utrDigits && d.length >= 6 && utrDigits.includes(d);
+                const isTimePart = /^\d{1,2}:\d{2}$/.test(w.text) || /^(am|pm)$/i.test(w.text) || /^(19|20)\d{2},?$/.test(w.text);
+                if ((isUtrPart || isTimePart) && !isCrit.has(w)) { crit.push(w.bbox); isCrit.add(w); }
+            });
+            const refs = words.filter(w => !isCrit.has(w) && w.text.length >= 3 && w.conf > 55).map(w => w.bbox);
+
+            const ela = await computeRealELA(full, crit, refs);
+            let pixelOk = true, pixelWhy;
+            if (!ela.measured) {
+                pixelOk = false;
+                pixelWhy = "Could not locate amount / ID / time on the screen to run the pixel check.";
+            } else if (ela.ratio > ELA_RATIO_LIMIT && ela.critMax > ELA_ABS_FLOOR) {
+                pixelOk = false;
+                pixelWhy = `Pixel inconsistency: amount/ID/time area is ${ela.ratio.toFixed(1)}x noisier than the rest of the screen (limit ${ELA_RATIO_LIMIT}x). Text was likely edited or pasted.`;
+            } else {
+                pixelWhy = `Pixel check passed: key fields match the rest of the screen (ratio ${ela.ratio.toFixed(1)}x, limit ${ELA_RATIO_LIMIT}x).`;
+            }
+
+            // duplicate check last, register only if everything else passed
+            let dup = false, dupMsg = "";
+            const othersOk = layoutOk && pixelOk && time.valid && utrFmtOk && amt;
+            if (utr) {
+                const chk = await checkUTR(utr, amt ? amt.value : "", app || "", false);
+                dup = chk.dup; dupMsg = chk.msg;
+                if (!dup && othersOk && registerInLedger) await checkUTR(utr, amt.value, app, true);
+            }
+            if (!amt) { layoutOk = false; layoutWhy = layoutWhy || "Could not read the payment amount."; }
+
+            currentAnalysisResult = buildResult({
+                app, amount: amt ? "\u20B9 " + amt.value : null, utr, rawTime: dtp ? dtp.raw : null,
+                layoutOk, layoutWhy, pixelOk, pixelWhy, time, utrFmtOk, dup, dupMsg, ela: ela.canvas
+            });
+            return currentAnalysisResult;
+        }
+
+        // ---- Scripted DEMO scenarios (labelled, fields are known, not OCR'd) ----
+        async function runDemoPipeline(img, demo) {
+            const full = document.getElementById('canvasProcessed');
+            full.width = img.width; full.height = img.height;
+            full.getContext('2d').drawImage(img, 0, 0);
+            const heat = document.getElementById('canvasELA');
+            heat.width = img.width; heat.height = img.height;
+            heat.getContext('2d').drawImage(img, 0, 0);
+            if (demo.fake) {
+                const c = heat.getContext('2d');
+                c.fillStyle = "rgba(255,40,0,0.55)";
+                c.fillRect(30, 205, img.width - 60, 45);
+            }
+            const dtp = parseDateTime(demo.time);
+            const time = validateTimestamp(dtp ? dtp.date : null);
+            const utrFmtOk = utrFormatOk(demo.utr, demo.app);
+            const chk = await checkUTR(demo.utr, demo.amount, demo.app, false);
+            const othersOk = !demo.fake && time.valid && utrFmtOk;
+            if (!chk.dup && othersOk) await checkUTR(demo.utr, demo.amount, demo.app, true);
+            currentAnalysisResult = buildResult({
+                app: demo.app, amount: demo.amount, utr: demo.utr, rawTime: demo.time,
+                layoutOk: true, layoutWhy: "", pixelOk: !demo.fake,
+                pixelWhy: demo.fake ? "[DEMO] Simulated splice: amount font/pixels differ from the rest of the receipt." : "[DEMO] Pixel check passed (scripted demo image).",
+                time, utrFmtOk, dup: chk.dup, dupMsg: chk.msg, ela: heat
+            });
+            currentAnalysisResult.reasons.unshift("[DEMO MODE] Scripted sample image. Upload a real screenshot for live OCR analysis.");
+            return currentAnalysisResult;
+        }
+
+        async function processUploadedImage(dataUrl, demo, liveMode = false) {
+            const startTime = performance.now();
+            setStatus("Scanning...");
+            let analysis;
+            try {
+                const img = await loadImg(dataUrl);
+                document.getElementById('placeholder').style.display = 'none';
+                const imgPreview = document.getElementById('imagePreview');
+                if (!liveMode) {
+                    imgPreview.src = dataUrl;
+                    imgPreview.style.display = 'block';
+                }
+                analysis = demo ? await runDemoPipeline(img, demo) : await runForensicPipeline(img, { registerInLedger: !liveMode });
+            } catch (e) {
+                console.error(e);
+                analysis = {
+                    app: "Unknown", amount: "Not read", utr: "Not read", timestamp: "Not read", isSuspicious: true,
+                    layoutPass: false, pixelPass: false, timePass: false, dupPass: false,
+                    reasons: ["Scan failed: " + e.message + ". Treat as SUSPICIOUS and verify manually."], elaCanvas: null
+                };
+            }
+            const elapsedMs = (performance.now() - startTime).toFixed(0);
+            renderVerdict(analysis, elapsedMs, liveMode);
+        }
+
+        function renderVerdict(res, elapsedMs, liveMode = false) {
+            const card = document.getElementById('verdictCard');
+            card.style.display = 'flex';
+            card.className = "verdict-card " + (res.isSuspicious ? "suspicious" : "real");
+
+            document.getElementById('verdictIcon').innerText = res.isSuspicious ? "⚠️" : "✅";
+            document.getElementById('verdictText').innerText = res.isSuspicious ? "SUSPICIOUS / FAKE!" : "GENUINE PAYMENT";
+            document.getElementById('scanTimeBadge').innerText = `${elapsedMs} ms` + (elapsedMs < 3000 ? ' (< 3.0s)' : ' (slow)');
+
+            document.getElementById('detApp').innerText = res.app;
+            document.getElementById('detAmount').innerText = res.amount;
+            document.getElementById('detUTR').innerText = res.utr;
+            document.getElementById('detTime').innerText = res.timestamp;
+
+            setTag('chkLayout', res.layoutPass);
+            setTag('chkPixel', res.pixelPass);
+            setTag('chkTime', res.timePass);
+            setTag('chkDuplicate', res.dupPass);
+
+            const reasonsBox = document.getElementById('reasonsBox');
+            reasonsBox.className = "reasons-box " + (res.isSuspicious ? "fail" : "pass");
+            document.getElementById('reasonHeader').innerText = res.isSuspicious ? "Reasons for Rejection (Do Not Deliver Order):" : "Verification Passed:";
+
+            const list = document.getElementById('reasonsList');
+            list.innerHTML = "";
+            res.reasons.forEach(r => {
+                const li = document.createElement('li');
+                li.innerText = r;
+                list.appendChild(li);
+            });
+
+            document.getElementById('elaToggleBtn').style.display = 'block';
+            if (!liveMode) {
+                playSound(!res.isSuspicious);
+                card.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function setTag(id, passed) {
+            const el = document.getElementById(id);
+            el.className = "check-tag " + (passed ? "pass" : "fail");
+            el.innerText = passed ? "PASS" : "FAIL";
+        }
+
+        function toggleELAMode() {
+            showingELA = !showingELA;
+            const imgPreview = document.getElementById('imagePreview');
+            const canvasELA = document.getElementById('canvasELA');
+            const btn = document.getElementById('elaToggleBtn');
+
+            if (showingELA) {
+                imgPreview.style.display = 'none';
+                canvasELA.style.display = 'block';
+                btn.innerText = "🖼️ View Original Screenshot";
+            } else {
+                imgPreview.style.display = 'block';
+                canvasELA.style.display = 'none';
+                btn.innerText = "🔬 Toggle ELA Forensic Heatmap";
+            }
+        }
+
+        function resetScanner() {
+            if (videoStream) {
+                stopLiveScanning();
+                videoStream.getTracks().forEach(t => t.stop());
+                videoStream = null;
+                document.getElementById('cameraVideo').style.display = 'none';
+                document.getElementById('laserBeam').style.display = 'none';
+                document.getElementById('btnCapture').style.display = 'none';
+                document.getElementById('btnLiveCam').innerText = "📷 Open Live Camera Scanner";
+            }
+            document.getElementById('verdictCard').style.display = 'none';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('canvasELA').style.display = 'none';
+            document.getElementById('elaToggleBtn').style.display = 'none';
+            document.getElementById('placeholder').style.display = 'flex';
+            document.querySelectorAll('.demo-chip').forEach(el => el.classList.remove('active'));
+            showingELA = false;
+        }
+
+        // Template Drawer
+        function drawRoundedRect(ctx, x, y, w, h, radius) {
+            if (typeof ctx.roundRect === 'function') {
+                ctx.beginPath();
+                ctx.roundRect(x, y, w, h, radius);
+                return;
+            }
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + w - radius, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+            ctx.lineTo(x + w, y + h - radius);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+            ctx.lineTo(x + radius, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        function drawGooglePayTemplate(ctx, w, h, amount, payee, utr, time, isFake) {
+            window.lastLoadedScenario = { amount: "₹ " + amount, utr: utr, time: time };
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = "#1a73e8";
+            ctx.fillRect(0, 0, w, 60);
+
+            ctx.beginPath();
+            ctx.arc(w / 2, 130, 36, 0, Math.PI * 2);
+            ctx.fillStyle = "#1e8e3e";
+            ctx.fill();
+
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(w / 2 - 14, 130);
+            ctx.lineTo(w / 2 - 4, 142);
+            ctx.lineTo(w / 2 + 16, 120);
+            ctx.stroke();
+
+            ctx.fillStyle = "#202124";
+            ctx.font = isFake ? "bold 38px Arial" : "bold 34px 'Inter', sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("₹" + amount, w / 2, 210);
+
+            ctx.fillStyle = "#3c4043";
+            ctx.font = "600 15px 'Inter', sans-serif";
+            ctx.fillText("Paid to " + payee, w / 2, 240);
+
+            ctx.strokeStyle = "#e8eaed";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(30, 275);
+            ctx.lineTo(w - 30, 275);
+            ctx.stroke();
+
+            ctx.textAlign = "left";
+            ctx.fillStyle = "#5f6368";
+            ctx.font = "12px 'Inter', sans-serif";
+            ctx.fillText("UPI transaction ID", 35, 310);
+            ctx.fillStyle = "#202124";
+            ctx.font = "600 13px 'JetBrains Mono', monospace";
+            ctx.fillText(utr, 35, 330);
+
+            ctx.fillStyle = "#5f6368";
+            ctx.font = "12px 'Inter', sans-serif";
+            ctx.fillText("To: " + payee, 35, 370);
+            ctx.fillText("From: State Bank of India", 35, 400);
+            ctx.fillText(time, 35, 440);
+        }
+
+        function drawPhonePeTemplate(ctx, w, h, amount, payee, utr, time, isFake) {
+            window.lastLoadedScenario = { amount: "₹ " + amount, utr: utr, time: time };
+            ctx.fillStyle = "#f5f6f8";
+            ctx.fillRect(0, 0, w, h);
+
+            ctx.fillStyle = "#5f259f";
+            ctx.fillRect(0, 0, w, 160);
+
+            ctx.beginPath();
+            ctx.arc(w / 2, 70, 28, 0, Math.PI * 2);
+            ctx.fillStyle = "#22c55e";
+            ctx.fill();
+
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(w / 2 - 10, 70);
+            ctx.lineTo(w / 2 - 2, 78);
+            ctx.lineTo(w / 2 + 12, 62);
+            ctx.stroke();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 18px 'Inter', sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("Transaction Successful", w / 2, 125);
+
+            ctx.fillStyle = "#ffffff";
+            drawRoundedRect(ctx, 20, 180, w - 40, 360, 12);
+            ctx.fill();
+
+            if (isFake) {
+                ctx.fillStyle = "#ffe4e6";
+                ctx.fillRect(30, 205, w - 60, 45);
+                ctx.fillStyle = "#991b1b";
+                ctx.font = "900 36px 'Impact', 'Arial Black', sans-serif";
+            } else {
+                ctx.fillStyle = "#111827";
+                ctx.font = "bold 32px 'Inter', sans-serif";
+            }
+            ctx.textAlign = "center";
+            ctx.fillText("₹" + amount, w / 2, 240);
+
+            ctx.fillStyle = "#4b5563";
+            ctx.font = "500 13px 'Inter', sans-serif";
+            ctx.fillText("Paid to " + payee, w / 2, 275);
+
+            ctx.textAlign = "left";
+            ctx.fillStyle = "#6b7280";
+            ctx.font = "12px 'Inter', sans-serif";
+            ctx.fillText("Transaction ID", 35, 330);
+            ctx.fillStyle = "#111827";
+            ctx.font = "600 13px 'JetBrains Mono', monospace";
+            ctx.fillText(utr, 35, 350);
+
+            ctx.fillStyle = "#6b7280";
+            ctx.font = "12px 'Inter', sans-serif";
+            ctx.fillText("Date & Time", 35, 390);
+            ctx.fillStyle = "#111827";
+            ctx.font = "500 12.5px 'Inter', sans-serif";
+            ctx.fillText(time, 35, 410);
+        }
+
+        function drawPaytmTemplate(ctx, w, h, amount, payee, utr, time, isFake) {
+            window.lastLoadedScenario = { amount: "₹ " + amount, utr: utr, time: time };
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, w, h);
+
+            ctx.fillStyle = "#002e6e";
+            ctx.fillRect(0, 0, w, 70);
+
+            ctx.beginPath();
+            ctx.arc(w / 2, 130, 32, 0, Math.PI * 2);
+            ctx.fillStyle = "#00b9f5";
+            ctx.fill();
+
+            ctx.fillStyle = "#002e6e";
+            ctx.font = "bold 20px 'Inter', sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("Payment Successful", w / 2, 195);
+
+            ctx.fillStyle = "#111827";
+            ctx.font = "bold 32px 'Inter', sans-serif";
+            ctx.fillText("₹" + amount, w / 2, 240);
+
+            ctx.fillStyle = "#4b5563";
+            ctx.font = "500 13px 'Inter', sans-serif";
+            ctx.fillText("To: " + payee, w / 2, 270);
+
+            ctx.textAlign = "left";
+            ctx.fillStyle = "#6b7280";
+            ctx.font = "12px 'Inter', sans-serif";
+            ctx.fillText("UPI Ref No: " + utr, 35, 340);
+            ctx.fillText(time, 35, 370);
+        }
+
+        if ('serviceWorker' in navigator && (location.protocol === 'http:' || location.protocol === 'https:')) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+            });
+        }
+    </script>
+</body>
+</html>

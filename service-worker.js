@@ -1,6 +1,7 @@
 const CACHE_NAME = 'upi-guard-v2';
 const FILES = [
     '/',
+    '/index.html',
     '/fast_scanner.html',
     '/manifest.json'
 ];

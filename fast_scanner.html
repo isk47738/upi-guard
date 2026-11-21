@@ -11,6 +11,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
     <style>
         :root {
@@ -1626,6 +1627,7 @@
 
         let greenPulseHistory = [];
         let liveTickPulsingDetected = false;
+        let wasLiveCameraScan = false;
 
         // Audio synthesizer & chime
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1860,7 +1862,7 @@
                     if (greenPulseHistory.length > 15) greenPulseHistory.shift();
                     const gMin = Math.min(...greenPulseHistory);
                     const gMax = Math.max(...greenPulseHistory);
-                    if ((gMax - gMin) >= 7 && green >= 15) {
+                    if ((gMax - gMin) >= 25 && green >= 20) {
                         liveTickPulsingDetected = true;
                         const lChip = document.getElementById('hudLivenessChip');
                         if (lChip) lChip.style.display = 'inline-flex';
@@ -1896,6 +1898,7 @@
         function triggerAutoRealtimeScan() {
             if (isProcessing) return;
             isProcessing = true;
+            wasLiveCameraScan = true;
 
             const snapCanvas = document.createElement('canvas');
             snapCanvas.width = video.videoWidth || 720;
@@ -1911,6 +1914,7 @@
         function onFileChosen(input) {
             if (!input.files || !input.files[0]) return;
             if (videoStream) stopRealtimeCamera();
+            wasLiveCameraScan = false;
 
             const file = input.files[0];
             const reader = new FileReader();
@@ -1979,6 +1983,68 @@
                     analyzingBox.style.display = 'none';
                     isProcessing = false;
                     displayVerdict(result, elapsed);
+
+                    // ── Tesseract.js OCR: read actual amount from receipt ──
+                    if (!scriptedMeta && typeof Tesseract !== 'undefined') {
+                        const amtEl = document.getElementById('vAmount');
+                        if (amtEl) amtEl.style.opacity = '0.6';
+                        Tesseract.recognize(dataUrl, 'eng', {
+                            logger: () => {}
+                        }).then(({ data: { text } }) => {
+                            const patterns = [
+                                /[₹]\s*([\d,]+(?:\.\d{1,2})?)/g,
+                                /Rs\.?\s*([\d,]+(?:\.\d{1,2})?)/gi,
+                                /INR\s*([\d,]+(?:\.\d{1,2})?)/gi,
+                                /Paid\s*(?:Successfully)?\s*[₹Rs.INR]*\s*([\d,]+(?:\.\d{1,2})?)/gi
+                            ];
+                            let bestAmount = null;
+                            let bestVal = 0;
+                            for (const pat of patterns) {
+                                let m;
+                                while ((m = pat.exec(text)) !== null) {
+                                    const val = parseFloat(m[1].replace(/,/g, ''));
+                                    if (val > bestVal && val < 100000) {
+                                        bestVal = val;
+                                        bestAmount = val;
+                                    }
+                                }
+                            }
+                            if (!bestAmount) {
+                                const nums = text.match(/\b(\d{2,6}(?:\.\d{1,2})?)\b/g);
+                                if (nums) {
+                                    for (const n of nums) {
+                                        const v = parseFloat(n);
+                                        if (v > bestVal && v > 1 && v < 100000) {
+                                            bestVal = v;
+                                            bestAmount = v;
+                                        }
+                                    }
+                                }
+                            }
+                            if (bestAmount && amtEl) {
+                                amtEl.innerText = "₹ " + bestAmount.toFixed(2);
+                                amtEl.style.opacity = '1';
+                                result.amount = "₹ " + bestAmount.toFixed(2);
+                                lastAnalysisResult = result;
+                                const lowerText = text.toLowerCase();
+                                const spoofKeywords = ['fakepay', 'spoof', 'fake screen', 'fake app',
+                                    'fp_spoof', 'dummy', 'mock payment', 'test payment'];
+                                const foundSpoof = spoofKeywords.some(kw => lowerText.includes(kw));
+                                if (foundSpoof && result.isReal) {
+                                    result.isReal = false;
+                                    result.reasonTitle = "SPOOF APP DETECTED VIA OCR!";
+                                    result.reasonText = "Tesseract OCR found suspicious keywords indicating a spoof/fake payment app.";
+                                    result.pixelPass = false;
+                                    lastAnalysisResult = result;
+                                    displayVerdict(result, elapsed);
+                                }
+                            } else if (amtEl) {
+                                amtEl.style.opacity = '1';
+                            }
+                        }).catch(() => {
+                            if (amtEl) amtEl.style.opacity = '1';
+                        });
+                    }
                 }, 380);
             };
             img.src = dataUrl;
@@ -2096,7 +2162,8 @@
             }
 
             // Real Decision Rule
-            const isFake = isPixelTampered || !isLayoutValid || isDuplicate;
+            const tickFailed = wasLiveCameraScan && !scripted && !liveTickPulsingDetected;
+            const isFake = isPixelTampered || !isLayoutValid || isDuplicate || tickFailed;
 
             let reasonTitle = "Verified Genuine Payment";
             let reasonText = `Receipt successfully matches official ${appName} design standards. Dual-zone ELA noise is uniform (disparity < 8%). Verified with Canteen Soundbox Gateway.`;
@@ -2104,6 +2171,9 @@
             if (isDuplicate) {
                 reasonTitle = "REUSED TRANSACTION ID!";
                 reasonText = `UTR Ref (${utrNumber}) has already been redeemed at this counter earlier! Duplicate screenshot attempt.`;
+            } else if (tickFailed) {
+                reasonTitle = "STATIC / DEAD GREEN TICK DETECTED!";
+                reasonText = `Live camera detected NO checkmark pulse animation. Real UPI apps animate the green tick at ~1.2 Hz. This appears to be a screenshot or spoof app with a static tick image.`;
             } else if (isPixelTampered) {
                 reasonTitle = "TAMPERED / EDITED AMOUNT DETECTED!";
                 reasonText = `Dual-zone ELA found anomalous noise disparity (${noiseDelta.toFixed(1)}) between amount and reference card. Digits were digitally spliced.`;
@@ -2112,21 +2182,17 @@
                 reasonText = "Screenshot dimensions do not match a valid mobile payment receipt. Provide full screen.";
             }
 
-            // Use bill amount set by operator (qrAmountInput) for real scans.
             let amountExtracted;
             if (scripted) {
                 amountExtracted = scripted.amount;
             } else {
                 const billInput = document.getElementById('qrAmountInput');
                 const billVal = billInput ? parseFloat(billInput.value) : NaN;
-                if (!isNaN(billVal) && billVal > 0) {
-                    amountExtracted = "₹ " + billVal.toFixed(2);
-                } else {
-                    const stableAmt = Math.round((W * H) / 1000) + 10;
-                    amountExtracted = "₹ " + Math.min(Math.max(stableAmt, 10), 9999).toFixed(2);
-                }
+                amountExtracted = (!isNaN(billVal) && billVal > 0)
+                    ? "₹ " + billVal.toFixed(2)
+                    : "₹ --";
             }
-            const tickPassed = scripted ? (scripted.tickPulsePass !== false) : (liveTickPulsingDetected || !isFake);
+            const tickPassed = scripted ? (scripted.tickPulsePass !== false) : liveTickPulsingDetected;
 
             return {
                 isReal: !isFake,

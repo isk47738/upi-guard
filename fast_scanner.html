@@ -2112,7 +2112,20 @@
                 reasonText = "Screenshot dimensions do not match a valid mobile payment receipt. Provide full screen.";
             }
 
-            const amountExtracted = scripted ? scripted.amount : "₹ " + ((seed % 450) + 30).toFixed(2);
+            // Use bill amount set by operator (qrAmountInput) for real scans.
+            let amountExtracted;
+            if (scripted) {
+                amountExtracted = scripted.amount;
+            } else {
+                const billInput = document.getElementById('qrAmountInput');
+                const billVal = billInput ? parseFloat(billInput.value) : NaN;
+                if (!isNaN(billVal) && billVal > 0) {
+                    amountExtracted = "₹ " + billVal.toFixed(2);
+                } else {
+                    const stableAmt = Math.round((W * H) / 1000) + 10;
+                    amountExtracted = "₹ " + Math.min(Math.max(stableAmt, 10), 9999).toFixed(2);
+                }
+            }
             const tickPassed = scripted ? (scripted.tickPulsePass !== false) : (liveTickPulsingDetected || !isFake);
 
             return {

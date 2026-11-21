@@ -10,9 +10,6 @@
 | :--- | :--- |
 | 🌐 **Live Web App** | [https://isk47738.github.io/upi-guard/](https://isk47738.github.io/upi-guard/) |
 | 💻 **GitHub Repository** | [https://github.com/isk47738/upi-guard](https://github.com/isk47738/upi-guard) |
-| 📊 **Presentation (PPTX)** | [Download 10-Slide PPTX](https://github.com/isk47738/upi-guard/raw/main/UPI_Guard_Final_Presentation.pptx) |
-| 📄 **Presentation (PDF)** | [View Slides PDF](https://github.com/isk47738/upi-guard/raw/main/UPI_Guard_Final_Presentation.pdf) |
-| 🎤 **Pitch Script & Q&A Cheat Sheet** | [View Q&A PDF](https://github.com/isk47738/upi-guard/raw/main/UPI_Guard_Pitch_QnA.pdf) |
 | 📱 **2nd Phone Test Simulator** | [https://isk47738.github.io/upi-guard/test_screens.html](https://isk47738.github.io/upi-guard/test_screens.html) |
 | 📸 **Sample Photos & GIFs Gallery** | [https://isk47738.github.io/upi-guard/samples/](https://isk47738.github.io/upi-guard/samples/) |
 

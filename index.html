@@ -1191,11 +1191,11 @@
                 <span style="color: #60a5fa; cursor: pointer;" onclick="clearLedger()">🔄 Reset Ledger</span>
             </div>
             <div class="demo-chips">
-                <div class="demo-chip real-chip" onclick="runScenario('phonepe_real')">🟢 Real PhonePe (Blinking Tick)</div>
-                <div class="demo-chip real-chip" onclick="runScenario('gpay_real')">🟢 Real GPay (Pulsing Tick)</div>
-                <div class="demo-chip fake-chip" onclick="runScenario('spoof_fake')">🔴 Fake Spoof (Dead Tick)</div>
-                <div class="demo-chip fake-chip" onclick="runScenario('edited_fake')">🔴 Fake Edited Amount</div>
-                <div class="demo-chip fake-chip" onclick="runScenario('duplicate_fake')">🔴 Reused UTR Dup</div>
+                <div class="demo-chip real-chip" onclick="runScenario('phonepe_real')">🟢 Real PhonePe (₹150)</div>
+                <div class="demo-chip real-chip" onclick="runScenario('gpay_real')">🟢 Real GPay (₹250)</div>
+                <div class="demo-chip fake-chip" onclick="runScenario('spoof_fake')">🔴 Fake Spoof (₹500)</div>
+                <div class="demo-chip fake-chip" onclick="runScenario('edited_fake')">🔴 Fake Edited (₹2,500)</div>
+                <div class="demo-chip fake-chip" onclick="runScenario('duplicate_fake')">🔴 Reused UTR Dup (₹150)</div>
             </div>
         </div>
 
@@ -1965,17 +1965,17 @@
             let scenarioMeta = null;
 
             if (type === 'gpay_real') {
-                drawGooglePayReceipt(ctx, 440, 760, "150.00", "LPU Campus Canteen", "43250" + Math.floor(100000 + Math.random()*899999), `${dateStr}, ${timeStr}`, false);
-                scenarioMeta = { app: "Google Pay", amount: "₹ 150.00", fake: false, tickPulsePass: true };
+                drawGooglePayReceipt(ctx, 440, 760, "250.00", "LPU Campus Canteen", "43250" + Math.floor(100000 + Math.random()*899999), `${dateStr}, ${timeStr}`, false);
+                scenarioMeta = { app: "Google Pay", amount: "₹ 250.00", fake: false, tickPulsePass: true };
             } else if (type === 'phonepe_real') {
-                drawPhonePeReceipt(ctx, 440, 760, "70.00", "Chai & Snacks Point", "T" + Math.floor(10000000000 + Math.random()*89999999999), `${dateStr}, ${timeStr}`, false);
-                scenarioMeta = { app: "PhonePe", amount: "₹ 70.00", fake: false, tickPulsePass: true };
+                drawPhonePeReceipt(ctx, 440, 760, "150.00", "Chai & Snacks Point", "T" + Math.floor(10000000000 + Math.random()*89999999999), `${dateStr}, ${timeStr}`, false);
+                scenarioMeta = { app: "PhonePe", amount: "₹ 150.00", fake: false, tickPulsePass: true };
             } else if (type === 'edited_fake') {
-                drawPhonePeReceipt(ctx, 440, 760, "850.00", "LPU Campus Canteen", "T241199321098", `${dateStr}, ${timeStr}`, true);
-                scenarioMeta = { app: "PhonePe", amount: "₹ 850.00", fake: true, tickPulsePass: false, reason: "Pixel Splicing Detected: Amount ₹850 was digitally edited with mismatched font noise." };
+                drawPhonePeReceipt(ctx, 440, 760, "2500.00", "LPU Campus Canteen", "T241199321098", `${dateStr}, ${timeStr}`, true);
+                scenarioMeta = { app: "Google Pay", amount: "₹ 2,500.00", fake: true, tickPulsePass: false, reason: "Pixel Splicing Detected: Amount ₹2,500 was digitally edited with mismatched font noise." };
             } else if (type === 'spoof_fake') {
                 drawSpoofReceipt(ctx, 440, 760, "500.00", "500.00", "Fake Canteen", "FP9988112233", `${dateStr}, ${timeStr}`);
-                scenarioMeta = { app: "FakePay Spoof", amount: "₹ 500.00", fake: true, tickPulsePass: false, reason: "Dead Static Checkmark: Spoof app has zero checkmark pulse animation & missing NPCI checksum." };
+                scenarioMeta = { app: "FakePe Spoof", amount: "₹ 500.00", fake: true, tickPulsePass: false, reason: "Dead Static Checkmark: Spoof app has zero checkmark pulse animation & missing NPCI checksum." };
             } else if (type === 'duplicate_fake') {
                 drawGooglePayReceipt(ctx, 440, 760, "150.00", "LPU Campus Canteen", "432501984211", `${dateStr}, ${timeStr}`, false);
                 scenarioMeta = { app: "Google Pay", amount: "₹ 150.00", fake: true, forceDup: true, tickPulsePass: false, reason: "Double-Spend Fraud: Static screenshot reuse. UTR (432501984211) already redeemed earlier!" };
@@ -2698,6 +2698,17 @@
             a.download = `UPI_Guard_Fraud_Incident_Report_${Date.now()}.csv`;
             a.click();
         }
+
+        // Auto-run sample scenario if URL parameter is present (e.g. ?sample=spoof_fake)
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const s = params.get('sample');
+                if (s) {
+                    setTimeout(() => runScenario(s), 350);
+                }
+            } catch(e) {}
+        });
     </script>
 </body>
 </html>

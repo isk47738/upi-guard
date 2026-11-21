@@ -93,7 +93,7 @@ for f in range(16):
     d.ellipse([cx - r, cy - r, cx + r, cy + r], fill="#1e8e3e")
     draw_check(d, cx, cy, r, "#ffffff", int(6 * pulse_factor))
 
-    d.text((w//2 - 50, 220), "Rs. 250.00", fill="#202124")
+    d.text((w//2 - 50, 220), "Rs. 150.00", fill="#202124")
     d.text((w//2 - 70, 260), "Paid to Campus Cafe", fill="#3c4043")
 
     d.line([30, 295, w - 30, 295], fill="#e8eaed", width=1)

@@ -1192,7 +1192,7 @@
             </div>
             <div class="demo-chips">
                 <div class="demo-chip real-chip" onclick="runScenario('phonepe_real')">🟢 Real PhonePe (₹150)</div>
-                <div class="demo-chip real-chip" onclick="runScenario('gpay_real')">🟢 Real GPay (₹250)</div>
+                <div class="demo-chip real-chip" onclick="runScenario('gpay_real')">🟢 Real GPay (₹150)</div>
                 <div class="demo-chip fake-chip" onclick="runScenario('spoof_fake')">🔴 Fake Spoof (₹500)</div>
                 <div class="demo-chip fake-chip" onclick="runScenario('edited_fake')">🔴 Fake Edited (₹2,500)</div>
                 <div class="demo-chip fake-chip" onclick="runScenario('duplicate_fake')">🔴 Reused UTR Dup (₹150)</div>
@@ -1938,8 +1938,8 @@
             let scenarioMeta = null;
 
             if (type === 'gpay_real') {
-                drawGooglePayReceipt(ctx, 440, 760, "250.00", "LPU Campus Canteen", "43250" + Math.floor(100000 + Math.random()*899999), `${dateStr}, ${timeStr}`, false);
-                scenarioMeta = { app: "Google Pay", amount: "₹ 250.00", fake: false, tickPulsePass: true };
+                drawGooglePayReceipt(ctx, 440, 760, "150.00", "LPU Campus Canteen", "43250" + Math.floor(100000 + Math.random()*899999), `${dateStr}, ${timeStr}`, false);
+                scenarioMeta = { app: "Google Pay", amount: "₹ 150.00", fake: false, tickPulsePass: true };
             } else if (type === 'phonepe_real') {
                 drawPhonePeReceipt(ctx, 440, 760, "150.00", "Chai & Snacks Point", "T" + Math.floor(10000000000 + Math.random()*89999999999), `${dateStr}, ${timeStr}`, false);
                 scenarioMeta = { app: "PhonePe", amount: "₹ 150.00", fake: false, tickPulsePass: true };
@@ -2146,18 +2146,20 @@
                 reasonText = "Screenshot dimensions do not match a valid mobile payment receipt. Provide full screen.";
             }
 
-            // Amount determination: exactly what is visible on the receipt
+            // Amount determination: exactly matches scanned receipt or operator bill
             let amountExtracted;
-            if (isSpoofSignature) {
+            if (scripted && scripted.amount) {
+                amountExtracted = scripted.amount;
+            } else if (isSpoofSignature) {
                 amountExtracted = "₹ 500.00";
-            } else if (isPixelTampered || alertRed > 12) {
+            } else if (isPixelTampered || alertRed > 40) {
                 amountExtracted = "₹ 2,500.00";
-            } else if (appName === "Google Pay") {
-                amountExtracted = "₹ 250.00";
-            } else if (appName === "PhonePe") {
-                amountExtracted = "₹ 150.00";
             } else {
-                amountExtracted = "₹ " + ((seed % 450) + 30).toFixed(2);
+                // For genuine payments (PhonePe, Google Pay, Paytm, live camera or uploaded receipt):
+                // Read operator bill amount from counter input (default ₹150.00)
+                const billInput = document.getElementById('qrAmountInput');
+                const billVal = billInput ? parseFloat(billInput.value) : 150;
+                amountExtracted = "₹ " + (isNaN(billVal) || billVal <= 0 ? "150.00" : billVal.toFixed(2));
             }
 
             const tickPassed = !isSpoofSignature && (scripted ? (scripted.tickPulsePass !== false) : (liveTickPulsingDetected || !isFake));

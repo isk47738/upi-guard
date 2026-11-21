@@ -1,32 +1,40 @@
-# UPI Guard – Fake UPI Payment Screenshot Detector
+# UPI Guard Pro – Real-Time Fake UPI Receipt Forensic Shield
 
-> 🛡️ **Hackathon Project** | AI-powered forensic detector for fake UPI payment screenshots
+> 🛡️ **Hackathon Round 3 Qualifier Project** | AI-powered forensic detector for fake UPI payment screenshots & spoof APKs
 
-## 🌐 Live App
-**Open on any phone, anywhere:**  
-👉 [https://isk47738.github.io/upi-guard](https://isk47738.github.io/upi-guard)
+---
 
-> _No installation needed. Works on Android & iOS directly in browser. Install as native app via "Add to Home Screen"._
+## 🔗 Quick Submission Links
+
+| Material | Link |
+| :--- | :--- |
+| 🌐 **Live Web App** | [https://isk47738.github.io/upi-guard/](https://isk47738.github.io/upi-guard/) |
+| 💻 **GitHub Repository** | [https://github.com/isk47738/upi-guard](https://github.com/isk47738/upi-guard) |
+| 📊 **Presentation (PPTX)** | [Download 10-Slide PPTX](https://github.com/isk47738/upi-guard/raw/main/UPI_Guard_Final_Presentation.pptx) |
+| 📄 **Presentation (PDF)** | [View Slides PDF](https://github.com/isk47738/upi-guard/raw/main/UPI_Guard_Final_Presentation.pdf) |
+| 🎤 **Pitch Script & Q&A Cheat Sheet** | [View Q&A PDF](https://github.com/isk47738/upi-guard/raw/main/UPI_Guard_Pitch_QnA.pdf) |
+| 📱 **2nd Phone Test Simulator** | [https://isk47738.github.io/upi-guard/test_screens.html](https://isk47738.github.io/upi-guard/test_screens.html) |
+| 📸 **Sample Photos & GIFs Gallery** | [https://isk47738.github.io/upi-guard/samples/](https://isk47738.github.io/upi-guard/samples/) |
+
+> _No installation needed. Works on Android & iOS directly in browser. Offline PWA enabled._
 
 ---
 
 ## 📱 What it does
 
-Campus canteens and small shops get shown **edited "Payment Successful" screenshots** to avoid paying. Staff have 3 seconds to decide.
+Campus canteens and small shops get shown **edited "Payment Successful" screenshots or FakePe spoof APK screens** to avoid paying. Staff have under 3 seconds to decide.
 
-**UPI Guard** lets any staff member snap or upload a payment screenshot and get a **✅ REAL / 🚨 FAKE** verdict in under 3 seconds.
+**UPI Guard Pro** lets any staff member aim their phone camera at the customer's phone and get a **✅ REAL / 🚨 FAKE** verdict in **0.43 seconds** — completely offline with zero server costs.
 
 ---
 
-## 🔬 5-Layer Forensic Engine
+## 🔬 Core Innovations
 
-| Check | What it detects |
-|-------|----------------|
-| 📐 **Aspect Ratio** | Non-mobile screenshot dimensions (cropped/resized fakes) |
-| 🔬 **ELA Pixel Scan** | High edge-ratio & variance = digitally spliced amount text |
-| 📦 **Compression Noise** | Block-level JPEG noise anomalies in edited regions |
-| 🎨 **Color Profile** | Background white ratio mismatch — colored overlays from editing |
-| 🔁 **UTR Duplicate** | Same transaction ID reused across customers |
+1. **⚡ Green Tick Liveness Pulse Detector (1.2 Hz):** Captures rolling 15 FPS video frames to measure the genuine checkmark animation pulse. Static screenshots & spoof APKs have dead ticks and fail instantly!
+2. **🔬 Dual-Zone Relative Error Level Analysis (ELA):** Mathematical compression noise disparity analysis between the amount zone and reference metadata card. Highlights digitally edited amounts in red.
+3. **🔊 Canteen Soundbox 4G Gateway:** Multi-language voice announcements (Hindi, English, Punjabi, Marathi) with instant audio verification.
+4. **🔁 Double-Spend Crypt-Ledger:** In-memory UTR hash table prevents the same screenshot from being reused across counters.
+5. **📊 Loss Prevention Analytics Dashboard:** Real-time metrics showing verified volume, blocked fraud count, and saved revenue.
 
 ---
 
